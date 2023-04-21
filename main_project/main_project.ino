@@ -15,32 +15,37 @@
 
  */
 #include <SPI.h>
-#include <MFRC522.h>
-#include <Servo.h>
-#include <Stepper.h>
-#include <DS1302.h>
+#include <MFRC522.h>                    // RFID library
+#include <Servo.h>                      // Servo library
+#include <Stepper.h>                    // Motor library
+#include <DS1302.h>                     // Clock library
 
-#define RST_PIN 3  // Configurable, see typical pin layout above
-#define SS_PIN 4  // Configurable, see typical pin layout above
+// RFID
+#define RST_PIN 3                       // Configurable, see typical pin layout above
+#define SS_PIN 4                        // Configurable, see typical pin layout above
+
+// PROXIMITY SENSOR
 #define sensorPin A0
+
+// MOTOR
 #define STEPSPERREVOLUTION 4096
 #define STEPSTOFEED 2048
 
-Stepper myStepper(STEPSPERREVOLUTION, 8, 9, 10, 11);
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+Stepper myStepper(STEPSPERREVOLUTION, 8, 9, 10, 11);    // Create motor instance
 
-Servo servoCover;  // create servo object to control a servo
+MFRC522 mfrc522(SS_PIN, RST_PIN);       // Create RFID instance
 
-int coverPos = 0;  // variable to store the servo position
+Servo servoCover;                       // Create servo instance
 
-bool open = false;
+int coverPos = 0;                       // Variable to store the servo position
+
+bool open = false;                      // Boolean to control the cover
+
+// MODULO DE RELOJ
 namespace {
-
 // Set the appropriate digital I/O pin connections. These are the pin
 // assignments for the Arduino as well for as the DS1302 chip. See the DS1302
-// datasheet:
-//
-//   http://datasheets.maximintegrated.com/en/ds/DS1302.pdf
+// datasheet:   http://datasheets.maximintegrated.com/en/ds/DS1302.pdf
 const int kCePin   = 5;  // Chip Enable
 const int kIoPin   = 6;  // Input/Output
 const int kSclkPin = 2;  // Serial Clock
@@ -81,15 +86,22 @@ void printTime() {
 
 }  // namespace
 
+
 void setup() {
-  // initialize the serial port:
-  Serial.begin(9600);
+
+  Serial.begin(9600);               // Init the serial port
   SPI.begin();                      // Init SPI bus
+
   mfrc522.PCD_Init();               // Init MFRC522 card
-  servoCover.attach(7);               // attaches the servo on pin 9 to the servo object
-  pinMode(sensorPin, INPUT);
-  Serial.println(F("Waiting for RFID card"));  //shows in serial that it is ready to read
-  myStepper.setSpeed(5);
+
+  servoCover.attach(7);             // Attaches the servo on pin 7 to the servo object
+
+  pinMode(sensorPin, INPUT);        // Sensor pin -> input
+
+  Serial.println(F("Waiting for RFID card"));  //Shows in serial that the RFID is ready to read
+
+  myStepper.setSpeed(5);            // Set speed to the motor
+
   // Initialize a new chip by turning off write protection and clearing the
   // clock halt flag. These methods needn't always be called. See the DS1302
   // datasheet for details.
@@ -97,48 +109,57 @@ void setup() {
   rtc.halt(false);
 
   // Make a new time object to set the date and time.
-  // Sunday, September 22, 2013 at 01:38:50.
   Time t(2023, 4, 19, 17, 34, 0, Time::kSaturday);
 
-  // Set the time and date on the chip.
-  rtc.time(t);
+  rtc.time(t);                        // Set the time and date on the chip.
 }
 
 void loop() {
 
-  Time actualTime = rtc.time();
+  Time actualTime = rtc.time();       // Get the actual time
   //printTime();
   char buf[50];
-  snprintf(buf, sizeof(buf), "hola %d", actualTime.sec);
+  snprintf(buf, sizeof(buf), "Segundos: %d", actualTime.sec);     // Shows in serial the seconds 
   Serial.println(buf);
+
+  // If its time to feed, the motor moves 
   if(actualTime.sec == 0){
     Serial.println("Girando 360");
     myStepper.step(2048);
     //delay(2000);
   }
-  //IDLE
+
+  //------- IDLE STATE -------
   if (!mfrc522.PICC_IsNewCardPresent() && !open) {
-    return;
+    return;           // NO TAG DETECTED
   }
-   //OPEN
+
+  ////------- OPEN STATE (TAG DETECTED)-------
   open = true;
+  // Moves the servo to open the cover
   while (coverPos-- >= 0) {
     Serial.println("Servo opening");
     servoCover.write(coverPos);
     delay(15);
   }
+
   Serial.println("opening");
+
+  // We find out if a cat is eating (Sensor >= 970 -> cat eating)
   int sensorValue;
   while((sensorValue = analogRead(sensorPin)) >= 970) {
     Serial.println(sensorValue);
     delay(100);
   }
+
+  // Theres no cat, servo closing
   Serial.println("closing");
   while (coverPos++ <= 180) {  // goes from 0 degrees to 180 degrees
     servoCover.write(coverPos);  // tell servo to go to position in variable 'pos'
     delay(15);  // waits 15 ms for the servo to reach the position
   }
-  open = false;
+
+  open = false;     // The over is closed
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
