@@ -21,11 +21,11 @@ const int stepsPerRevolution = 500;  // change this to fit the number of steps p
 // for your motor
 
 // initialize the stepper library on pins 8 through 11:
-Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+Stepper myStepper(stepsPerRevolution, 5, 6, 7, 8);
 
 void setup() {
   // set the speed at 60 rpm:
-  myStepper.setSpeed(60);
+  myStepper.setSpeed(20);
   // initialize the serial port:
   Serial.begin(9600);
 }

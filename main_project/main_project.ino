@@ -21,8 +21,8 @@
 #include <DS1302.h>                     // Clock library
 
 // RFID
-#define RST_PIN 3                       // Configurable, see typical pin layout above
-#define SS_PIN 4                        // Configurable, see typical pin layout above
+#define RST_PIN 9                       // Configurable, see typical pin layout above
+#define SS_PIN 10                       // Configurable, see typical pin layout above
 
 // PROXIMITY SENSOR
 #define sensorPin A0
@@ -31,7 +31,15 @@
 #define STEPSPERREVOLUTION 4096
 #define STEPSTOFEED 2048
 
-Stepper myStepper(STEPSPERREVOLUTION, 8, 9, 10, 11);    // Create motor instance
+#define IN1 5
+#define IN2 6
+#define IN3 7
+#define IN4 8
+
+#define SERVOPIN 19
+
+
+Stepper myStepper(STEPSPERREVOLUTION, IN1, IN2, IN3, IN4);    // Create motor instance
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);       // Create RFID instance
 
@@ -46,8 +54,8 @@ namespace {
 // Set the appropriate digital I/O pin connections. These are the pin
 // assignments for the Arduino as well for as the DS1302 chip. See the DS1302
 // datasheet:   http://datasheets.maximintegrated.com/en/ds/DS1302.pdf
-const int kCePin   = 5;  // Chip Enable
-const int kIoPin   = 6;  // Input/Output
+const int kCePin   = 4;  // Chip Enable
+const int kIoPin   = 3;  // Input/Output
 const int kSclkPin = 2;  // Serial Clock
 
 // Create a DS1302 object.
@@ -94,7 +102,7 @@ void setup() {
 
   mfrc522.PCD_Init();               // Init MFRC522 card
 
-  servoCover.attach(7);             // Attaches the servo on pin 7 to the servo object
+  servoCover.attach(SERVOPIN);             // Attaches the servo on pin 7 to the servo object
 
   pinMode(sensorPin, INPUT);        // Sensor pin -> input
 
