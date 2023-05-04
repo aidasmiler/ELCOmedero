@@ -38,6 +38,8 @@
 
 #define SERVOPIN 19
 
+#define UMBRAL 970
+
 
 Stepper myStepper(STEPSPERREVOLUTION, IN1, IN2, IN3, IN4);    // Create motor instance
 
@@ -131,7 +133,7 @@ void loop() {
   Serial.println(buf);
 
   // If its time to feed, the motor moves 
-  if(actualTime.sec == 0){
+  if(actualTime.sec == 30){
     Serial.println("Girando 360");
     myStepper.step(2048);
     //delay(2000);
@@ -153,9 +155,9 @@ void loop() {
 
   Serial.println("opening");
 
-  // We find out if a cat is eating (Sensor >= 970 -> cat eating)
+  // We find out if a cat is eating (Sensor >= UMBRAL -> cat eating)
   int sensorValue;
-  while((sensorValue = analogRead(sensorPin)) >= 970) {
+  while((sensorValue = analogRead(sensorPin)) >= UMBRAL) {
     Serial.println(sensorValue);
     delay(100);
   }
