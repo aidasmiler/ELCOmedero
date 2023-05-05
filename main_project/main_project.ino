@@ -1,28 +1,22 @@
-
 /*
- Stepper Motor Control - one revolution
-
- This program drives a unipolar or bipolar stepper motor.
- The motor is attached to digital pins 8 - 11 of the Arduino.
-
- The motor should revolve one revolution in one direction, then
- one revolution in the other direction.
-
-
- Created 11 Mar. 2007
- Modified 30 Nov. 2009
- by Tom Igoe
-
+ Created Mar-May 2023
+ by GR 6 ELCO 2023 : 
+    	Isabel Salmerón Marazuela 
+    	Sergio Ruano Martínez
+    	Aida Rodríguez Pérez 
+    	Paula Rodríguez Sánchez 
+    	María Rincón Gaitero 
+    	Álvaro Gómez Pavón 
  */
-#include <SPI.h>
+#include <SPI.h>                        // SPI library
 #include <MFRC522.h>                    // RFID library
 #include <Servo.h>                      // Servo library
 #include <Stepper.h>                    // Motor library
 #include <DS1302.h>                     // Clock library
 
 // RFID
-#define RST_PIN 9                       // Configurable, see typical pin layout above
-#define SS_PIN 10                       // Configurable, see typical pin layout above
+#define RST_PIN 9                       // RFID reset Pin
+#define SS_PIN 10                       // RFID DAT Pin
 
 // PROXIMITY SENSOR
 #define sensorPin A0
@@ -38,7 +32,9 @@
 
 #define SERVOPIN 19
 
-#define UMBRAL 970
+#define UMBRAL 975
+
+#define TIEMPO_COMIDA 10
 
 
 Stepper myStepper(STEPSPERREVOLUTION, IN1, IN2, IN3, IN4);    // Create motor instance
@@ -133,7 +129,7 @@ void loop() {
   Serial.println(buf);
 
   // If its time to feed, the motor moves 
-  if(actualTime.sec == 30){
+  if(actualTime.sec == TIEMPO_COMIDA){
     Serial.println("Girando 360");
     myStepper.step(2048);
     //delay(2000);
