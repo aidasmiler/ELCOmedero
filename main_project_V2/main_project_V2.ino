@@ -27,10 +27,10 @@
 
 #define IN1 A1 
 #define IN2 A2
-#define IN3 7
-#define IN4 8
+#define IN3 A3
+#define IN4 A4
 
-#define SERVOPIN 19
+#define SERVOPIN 5
 
 #define UMBRAL 975
 
@@ -104,9 +104,10 @@ void setup() {
 
   pinMode(sensorPin, INPUT);        // Sensor pin -> input
 
-  pinMode()
-
-  Serial.println(F("Waiting for RFID card"));  //Shows in serial that the RFID is ready to read
+  pinMode(IN1, OUTPUT);             // Motor -> output
+  pinMode(IN2, OUTPUT);             
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 
   myStepper.setSpeed(5);            // Set speed to the motor
 

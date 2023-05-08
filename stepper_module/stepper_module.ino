@@ -17,28 +17,32 @@
 
 #include <Stepper.h>
 
-const int stepsPerRevolution = 500;  // change this to fit the number of steps per revolution
-// for your motor
+#define STEPSPERREVOLUTION 4096
+#define STEPSTOFEED 2048
+
+#define IN1 A1 
+#define IN2 A2
+#define IN3 A3
+#define IN4 A4
 
 // initialize the stepper library on pins 8 through 11:
-Stepper myStepper(stepsPerRevolution, 5, 6, 7, 8);
+Stepper myStepper(STEPSPERREVOLUTION, IN1, IN2, IN3, IN4);    // Create motor instance
 
 void setup() {
   // set the speed at 60 rpm:
-  myStepper.setSpeed(20);
+  myStepper.setSpeed(5);            // Set speed to the motor
   // initialize the serial port:
   Serial.begin(9600);
+  pinMode(IN1, OUTPUT);             // Motor -> output
+  pinMode(IN2, OUTPUT);             
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 }
 
 void loop() {
   // step one revolution  in one direction:
   Serial.println("clockwise");
-  myStepper.step(stepsPerRevolution);
-  delay(2000);
-
-  // step one revolution in the other direction:
-  Serial.println("counterclockwise");
-  myStepper.step(-stepsPerRevolution);
+  myStepper.step(STEPSPERREVOLUTION);
   delay(2000);
 }
 
