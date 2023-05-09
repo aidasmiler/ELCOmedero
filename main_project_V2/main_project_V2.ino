@@ -32,7 +32,7 @@
 
 #define SERVOPIN 5
 
-#define UMBRAL 975
+#define UMBRAL 990
 
 #define TIEMPO_COMIDA 10
 
@@ -43,7 +43,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);       // Create RFID instance
 
 Servo servoCover;                       // Create servo instance
 
-int coverPos = 0;                       // Variable to store the servo position
+int coverPos = 180;                       // Variable to store the servo position
 
 bool open = false;                      // Boolean to control the cover
 
@@ -132,6 +132,7 @@ void loop() {
   Serial.println(buf);
 
   // If its time to feed, the motor moves 
+  //if(actualTime.sec % TIEMPO_COMIDA == 0){
   if(actualTime.sec == TIEMPO_COMIDA){
     Serial.println("Girando 360");
     myStepper.step(2048);
@@ -146,13 +147,19 @@ void loop() {
   ////------- OPEN STATE (TAG DETECTED)-------
   open = true;
   // Moves the servo to open the cover
-  while (coverPos-- >= 0) {
+  Serial.println("opening");
+
+  /*while (coverPos-- >= 0) {
     Serial.println("Servo opening");
     servoCover.write(coverPos);
     delay(15);
-  }
+  } */
 
-  Serial.println("opening");
+  for (coverPos = 180; coverPos >= 0; coverPos -= 1) { // goes from 0 degrees to 180 degrees
+  // in steps of 1 degree
+    servoCover.write(coverPos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15 ms for the servo to reach the position
+  }
 
   // We find out if a cat is eating (Sensor >= UMBRAL -> cat eating)
   int sensorValue;
@@ -160,15 +167,21 @@ void loop() {
     Serial.println(sensorValue);
     delay(100);
   }
-
+  Serial.println(sensorValue);
   // Theres no cat, servo closing
   Serial.println("closing");
-  while (coverPos++ <= 180) {  // goes from 0 degrees to 180 degrees
+ 
+  /*while (coverPos++ <= 180) {    // goes from 0 degrees to 180 degrees
     servoCover.write(coverPos);  // tell servo to go to position in variable 'pos'
-    delay(15);  // waits 15 ms for the servo to reach the position
+    delay(15);                   // waits 15 ms for the servo to reach the position
+  } */
+
+  for (coverPos = 0; coverPos <= 180; coverPos += 1) { // goes from 180 degrees to 0 degrees
+    servoCover.write(coverPos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15 ms for the servo to reach the position
   }
 
-  open = false;     // The over is closed
+  open = false;     // The cover is closed
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
